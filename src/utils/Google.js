@@ -1,9 +1,11 @@
 import { google } from 'googleapis'
 
 const GOOGLE_SHEET_ID = process.env.SHEET_ID
+const GOOGLE_APPLICATION_CREDENTIALS =
+  process.env.GOOGLE_APPLICATION_CREDENTIALS
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: './src/connections/cred.json',
+  keyFile: GOOGLE_APPLICATION_CREDENTIALS,
   scopes: 'https://www.googleapis.com/auth/spreadsheets',
 })
 
