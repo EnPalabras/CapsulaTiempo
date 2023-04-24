@@ -5,6 +5,7 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx}',
     './src/app/**/*.{js,ts,jsx,tsx}',
     './node_modules/flowbite/**/*.js',
+    './node_modules/flowbite-react/**/*.js',
   ],
   darkMode: 'class',
   theme: {
