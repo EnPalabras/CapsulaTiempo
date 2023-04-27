@@ -1,11 +1,13 @@
 import { google } from 'googleapis'
 
-const GOOGLE_SHEET_ID = process.env.SHEET_ID
-const GOOGLE_APPLICATION_CREDENTIALS =
-  process.env.GOOGLE_APPLICATION_CREDENTIALS
+const { GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY } =
+  process.env
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: GOOGLE_APPLICATION_CREDENTIALS,
+  credentials: {
+    client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: GOOGLE_PRIVATE_KEY,
+  },
   scopes: 'https://www.googleapis.com/auth/spreadsheets',
 })
 
