@@ -12,7 +12,9 @@ export default async function handler(req, res) {
     const table_name = 'Hoja 1'
 
     try {
-      await appendData(table_name, values)
+      const upload = await appendData(table_name, values)
+      console.log(upload)
+
       res.status(200).json({ message: 'ok' })
     } catch (error) {
       console.log(error)
