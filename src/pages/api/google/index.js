@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   if (method == 'POST') {
     try {
       const { table_name, values } = req.body
-      await appendData(table_name, values)
+      const upload = await appendData(table_name, values)
+      console.log(upload)
       res.status(200).json({ message: 'ok' })
     } catch (error) {
       console.log(error)
