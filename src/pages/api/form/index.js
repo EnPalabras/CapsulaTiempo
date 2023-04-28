@@ -6,6 +6,8 @@ export default async function handler(req, res) {
   if (method == 'POST') {
     const { name, email, subject, message } = req.body
 
+    console.log(req.body)
+
     const values = [[name, email, subject, message, new Date().toISOString()]]
     const table_name = 'Hoja 1'
 

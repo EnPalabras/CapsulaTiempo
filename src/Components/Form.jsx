@@ -24,7 +24,6 @@ export default function Form() {
     })
 
     const response = await uploadForm.json()
-    console.log(response)
     if (uploadForm.status === 200) {
       console.log('Success')
     } else {
