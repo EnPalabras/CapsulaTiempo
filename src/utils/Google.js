@@ -11,9 +11,6 @@ const auth = new google.auth.GoogleAuth({
   scopes: 'https://www.googleapis.com/auth/spreadsheets',
 })
 
-console.log(GOOGLE_SERVICE_ACCOUNT_EMAIL)
-console.log(GOOGLE_PRIVATE_KEY)
-
 const client = async () => {
   return await auth.getClient()
 }
