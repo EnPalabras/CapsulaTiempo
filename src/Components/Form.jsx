@@ -62,9 +62,7 @@ const options = {
 export default function Form() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState(
-    'Oops! Algo salió mal. Intentá de nuevo más tarde'
-  )
+  const [error, setError] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
