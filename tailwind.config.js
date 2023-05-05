@@ -6,6 +6,7 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx}',
     './node_modules/flowbite/**/*.js',
     './node_modules/flowbite-react/**/*.js',
+    './node_modules/tailwind-datepicker-react/dist/**/*.js',
   ],
   darkMode: 'class',
   theme: {

@@ -8,6 +8,7 @@ export default function Document() {
         <Main />
         <NextScript />
         <NextScript src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.4/flowbite.min.js" />
+        <NextScript src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/datepicker.min.js" />
       </body>
     </Html>
   )
