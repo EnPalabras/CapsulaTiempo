@@ -155,7 +155,7 @@ export default function Form() {
                 value={form.name}
                 onChange={onInputChange}
                 className="shadow-sm bg-gray-50 w-full border border-gray-300 text-gray-900 text-sm rounded-lg w-fullfocus:ring-primary-500 focus:border-primary-500 block p-2.5"
-                placeholder="Taylor Swift"
+                placeholder="Lionel Messi"
                 required
               />
             </div>
@@ -206,7 +206,7 @@ export default function Form() {
               value={form.message}
               onChange={onInputChange}
               className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              placeholder="In a year"
+              placeholder="Escribí acá tu mensaje para el futuro"
             ></textarea>
           </div>
           {error && (
@@ -224,7 +224,7 @@ export default function Form() {
             <button
               disabled
               type="button"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm py-3 px-5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
             >
               <svg
                 aria-hidden="true"
@@ -243,7 +243,7 @@ export default function Form() {
                   fill="currentColor"
                 />
               </svg>
-              Loading...
+              Cargando...
             </button>
           ) : (
             <button
