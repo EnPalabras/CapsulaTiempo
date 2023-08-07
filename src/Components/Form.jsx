@@ -132,11 +132,25 @@ export default function Form() {
     <section className="bg-white dark:bg-gray-900">
       <div className="py-8 lg:py-16 px-4 mx-auto max-w-screen-md">
         <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-center text-gray-900">
-          En Palabras
+          ¿Qué te gustaría decirle a tu <i>"yo del futuro"</i>?
         </h2>
         <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
-          Acá (o en cualquier lado) podría ir un texto que explique de qué se
-          trata la acción o lo que sea
+          Los días pasan tan rápido que es muy fácil perder de vista nuestros
+          deseos personales, aprendizajes y el camino recorrido.
+        </p>
+        <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
+          Por eso, te invitamos a escribirte una carta contandote eso que creés
+          que a tu{' '}
+          <b>
+            <i>"yo del futuro" </i>
+          </b>
+          le podría emocionar y le gustaría recordar.
+        </p>
+        <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
+          Dejate llevar por tus sensaciones y aprovechá el siguiente espacio
+          para expresar cómo te sentís, qué aspiraciones, miedos y desafíos
+          tenés, para que en un tiempo, no muy lejano, puedas reencontrarte con
+          esa versión tuya.
         </p>
 
         <form className="space-y-8">
@@ -155,7 +169,7 @@ export default function Form() {
                 value={form.name}
                 onChange={onInputChange}
                 className="shadow-sm bg-gray-50 w-full border border-gray-300 text-gray-900 text-sm rounded-lg w-fullfocus:ring-primary-500 focus:border-primary-500 block p-2.5"
-                placeholder="Lionel Messi"
+                placeholder="Como quieras que te llamemos"
                 required
               />
             </div>
@@ -188,7 +202,7 @@ export default function Form() {
               value={form.email}
               onChange={onInputChange}
               className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
-              placeholder="nombre@enpalabras.com"
+              placeholder="Al que te enviaremos tu carta en el futuro"
               required
             />
           </div>
