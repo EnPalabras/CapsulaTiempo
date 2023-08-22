@@ -55,7 +55,7 @@ const options = {
     ),
   },
   datepickerClassNames: 'top-50 ',
-  defaultDate: new Date('2023-07-21'),
+  defaultDate: new Date('2023-09-21'),
   language: 'sp',
 }
 
