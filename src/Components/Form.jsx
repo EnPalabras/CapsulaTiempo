@@ -55,7 +55,7 @@ const options = {
     ),
   },
   datepickerClassNames: 'top-50 ',
-  defaultDate: new Date('2023-09-21'),
+  defaultDate: new Date('2023-10-21'),
   language: 'sp',
 }
 
@@ -80,14 +80,21 @@ export default function Form() {
     setLoading(true)
     setError(false)
 
-    if (!form.name || !form.email || !form.message || !form.date) {
-      setError('Completa todos los campos')
+    if (form)
+      if (!form.name || !form.email || !form.message || !form.date) {
+        setError('Completa todos los campos')
+        setLoading(false)
+        return
+      }
+
+    if (form.email.indexOf('@') === -1) {
+      setError('El email no es válido')
       setLoading(false)
       return
     }
 
-    if (form.email.indexOf('@') === -1) {
-      setError('El email no es válido')
+    if (new Date(form.date) < new Date()) {
+      setError('La fecha seleccionada es anterior al día de hoy')
       setLoading(false)
       return
     }
@@ -117,9 +124,15 @@ export default function Form() {
   }
 
   const handleDateChange = (selectedDate) => {
+    // if (selectedDate < new Date()) {
+
+    //   return
+    // }
+
     setForm({
       ...form,
-      date: new Date(selectedDate).toISOString().slice(0, 10),
+      // date: new Date(selectedDate).toISOString().slice(0, 10),
+      date: new Date(selectedDate),
     })
   }
   const [show, setShow] = useState(false)
@@ -238,12 +251,12 @@ export default function Form() {
             <button
               disabled
               type="button"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm py-3 px-5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm py-3 px-5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
             >
               <svg
                 aria-hidden="true"
                 role="status"
-                class="inline w-4 h-4 mr-3 text-white animate-spin"
+                className="inline w-4 h-4 mr-3 text-white animate-spin"
                 viewBox="0 0 100 101"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

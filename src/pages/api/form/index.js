@@ -8,7 +8,9 @@ export default async function handler(req, res) {
 
     console.log(req.body)
 
-    const values = [[name, email, subject, message, new Date().toISOString()]]
+    const values = [
+      [name, email, subject, message, new Date().toISOString().slice(0, 10)],
+    ]
     const table_name = 'Hoja 1'
 
     try {
