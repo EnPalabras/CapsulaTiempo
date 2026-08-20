@@ -1,286 +1,362 @@
 import { useState } from 'react'
-import Datepicker from 'tailwind-datepicker-react'
+import { Input, Select, Campo } from '@/Components/Campos'
+import Prompts from '@/Components/Prompts'
+import Confirmacion from '@/Components/Confirmacion'
+import {
+  MAX_MENSAJE,
+  PROVINCIAS,
+  AVISO_ENTREGA,
+  MICROTEXTO_DIRECCION,
+} from '@/constants/campana'
 
-const options = {
-  autoHide: true,
-  todayBtn: false,
-  clearBtn: false,
-  maxDate: new Date('2030-01-01'),
-  minDate: new Date('1950-01-01'),
-  weekDays: ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'],
-  theme: {
-    // background: 'bg-gray-700 dark:bg-gray-800',
-    todayBtn: '',
-    clearBtn: '',
-    icons: '',
-    text: '',
-    disabledText: 'text-gray-300',
-    input: '',
-    inputIcon: '',
-    selected: 'hover:bg-primary-500',
-  },
-  icons: {
-    // () => ReactElement | JSX.Element
-    prev: () => (
-      <svg
-        className="w-6 h-6 dark:text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-        ></path>
-      </svg>
-    ),
-    next: () => (
-      <svg
-        className="w-6 h-6 dark:text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          fillRule="evenodd"
-          clipRule="evenodd"
-          strokeLinejoin="round"
-          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-        ></path>
-      </svg>
-    ),
-  },
-  datepickerClassNames: 'top-50 ',
-  defaultDate: new Date('2023-10-21'),
-  language: 'sp',
+// NEXT_PUBLIC_API_URL solo hace falta para apuntar a otro lado (un localhost,
+// una preview). Se hornea en el build, no se lee en runtime.
+const API =
+  process.env.NEXT_PUBLIC_API_URL ?? 'https://server-en-palabras.vercel.app'
+
+const FORM_INICIAL = {
+  nombre: '',
+  email: '',
+  mensaje: '',
+  envioNombre: '',
+  envioCalle: '',
+  envioPisoDepto: '',
+  envioLocalidad: '',
+  envioProvincia: '',
+  envioCp: '',
+  envioTelefono: '',
+  consentimiento: false,
 }
 
-export default function Form() {
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState(false)
+// Espejo de la validación del backend. Acá es para no hacer viajar un form que
+// ya sabemos que va a rebotar; la validación que manda es la del server.
+function validar(form) {
+  const e = {}
+  if (!form.nombre.trim()) e.nombre = 'Contanos cómo querés que te llamemos'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
+    e.email = 'Revisá el email, parece incompleto'
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    message: '',
-    date: new Date(),
-  })
+  const largo = form.mensaje.trim().length
+  if (largo === 0) e.mensaje = 'Escribile algo a tu yo del futuro'
+  else if (largo > MAX_MENSAJE)
+    e.mensaje = `Te pasaste por ${largo - MAX_MENSAJE} caracteres`
 
-  const onInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  if (!form.envioNombre.trim()) e.envioNombre = 'Nombre y apellido'
+  if (!form.envioCalle.trim()) e.envioCalle = 'Calle y número'
+  if (!form.envioLocalidad.trim()) e.envioLocalidad = 'Localidad'
+  if (!form.envioProvincia) e.envioProvincia = 'Elegí una provincia'
+  if (form.envioCp.replace(/\D/g, '').length !== 4)
+    e.envioCp = 'Son 4 números'
+
+  // Igual de flojo que el backend: no vale perder una carta porque alguien
+  // escribió el 0, el 15 o el +54.
+  const telefono = form.envioTelefono.replace(/\D/g, '')
+  if (telefono.length < 8) e.envioTelefono = 'Falta la característica'
+  else if (telefono.length > 15) e.envioTelefono = 'Tiene números de más'
+
+  if (!form.consentimiento)
+    e.consentimiento = 'Necesitamos que aceptes el aviso de privacidad'
+
+  return e
+}
+
+export default function Form({ origen }) {
+  const [form, setForm] = useState(FORM_INICIAL)
+  const [errores, setErrores] = useState({})
+  const [enviando, setEnviando] = useState(false)
+  const [errorGeneral, setErrorGeneral] = useState('')
+  const [resultado, setResultado] = useState(null)
+
+  const onChange = (e) => {
+    const { name, type, checked, value } = e.target
+    setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
+    // Limpiamos el error del campo al tocarlo, no en cada tecla del form entero.
+    setErrores((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
   }
+
+  const restantes = MAX_MENSAJE - form.mensaje.length
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setError(false)
+    setErrorGeneral('')
 
-    if (form)
-      if (!form.name || !form.email || !form.message || !form.date) {
-        setError('Completa todos los campos')
-        setLoading(false)
+    const encontrados = validar(form)
+    if (Object.keys(encontrados).length > 0) {
+      setErrores(encontrados)
+      // Llevamos el foco al primer campo con problema.
+      document.getElementById(Object.keys(encontrados)[0])?.focus()
+      return
+    }
+
+    setEnviando(true)
+    try {
+      const res = await fetch(`${API}/api/carta-futuro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: form.nombre,
+          email: form.email,
+          mensaje: form.mensaje,
+          envio: {
+            nombre: form.envioNombre,
+            calle: form.envioCalle,
+            pisoDepto: form.envioPisoDepto,
+            localidad: form.envioLocalidad,
+            provincia: form.envioProvincia,
+            cp: form.envioCp,
+            telefono: form.envioTelefono,
+          },
+          consentimiento: form.consentimiento,
+          origen: origen?.nombre,
+          utm: origen?.utm,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setResultado({
+          formato: data.formato,
+          duplicada: data.duplicada,
+          nombre: form.nombre.trim(),
+        })
         return
       }
 
-    if (form.email.indexOf('@') === -1) {
-      setError('El email no es válido')
-      setLoading(false)
-      return
-    }
-
-    if (new Date(form.date) < new Date()) {
-      setError('La fecha seleccionada es anterior al día de hoy')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const uploadForm = await fetch(
-        'https://capsulabackend-production.up.railway.app/api/capsula',
-        {
-          method: 'POST',
-          body: JSON.stringify(form),
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      if (data?.errores) {
+        // El backend nombra los campos anidados como "envio.cp": los mapeamos
+        // a los ids planos del form.
+        const mapeados = {}
+        for (const [campo, mensaje] of Object.entries(data.errores)) {
+          const plano = campo.startsWith('envio.')
+            ? 'envio' +
+              campo.slice(6).charAt(0).toUpperCase() +
+              campo.slice(7)
+            : campo
+          mapeados[plano] = mensaje
         }
-      )
-
-      const response = await uploadForm.json()
-      if (uploadForm.status === 200) {
-        setSuccess(true)
+        setErrores(mapeados)
+        setErrorGeneral('Revisá los campos marcados.')
       } else {
-        setError('Oops! Algo salió mal. Intentá de nuevo más tarde')
+        setErrorGeneral(
+          data?.error ?? 'Algo salió mal. Probá de nuevo en un momento.'
+        )
       }
-      setLoading(false)
-    } catch (error) {
-      setLoading(false)
+    } catch {
+      setErrorGeneral(
+        'No pudimos conectarnos. Revisá tu conexión y probá de nuevo.'
+      )
+    } finally {
+      setEnviando(false)
     }
   }
 
-  const handleDateChange = (selectedDate) => {
-    // if (selectedDate < new Date()) {
-
-    //   return
-    // }
-
-    setForm({
-      ...form,
-      // date: new Date(selectedDate).toISOString().slice(0, 10),
-      date: new Date(selectedDate),
-    })
-  }
-  const [show, setShow] = useState(false)
-
-  const handleClose = (state) => {
-    setShow(state)
-  }
+  if (resultado) return <Confirmacion {...resultado} />
 
   return (
-    <section className="bg-white dark:bg-gray-900">
-      <div className="py-8 lg:py-16 px-4 mx-auto max-w-screen-md">
-        <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-center text-gray-900">
-          ¿Qué te gustaría decirle a tu <i>"yo del futuro"</i>?
-        </h2>
-        <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
+    <section className="bg-white">
+      <div className="mx-auto max-w-screen-md px-4 py-8 lg:py-16">
+        <h1 className="mb-4 text-center text-4xl font-extrabold tracking-tight text-gray-900">
+          ¿Qué te gustaría decirle a tu <i>&quot;yo del futuro&quot;</i>?
+        </h1>
+        <p className="mb-8 text-center text-lg font-light text-gray-500 sm:text-xl">
           Los días pasan tan rápido que es muy fácil perder de vista nuestros
-          deseos personales, aprendizajes y el camino recorrido.
-        </p>
-        <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
-          Por eso, te invitamos a escribirte una carta contandote eso que creés
-          que a tu{' '}
-          <b>
-            <i>"yo del futuro" </i>
-          </b>
-          le podría emocionar y le gustaría recordar.
-        </p>
-        <p className="mb-8 lg:mb-16 font-light text-center text-gray-500 sm:text-xl">
-          Dejate llevar por tus sensaciones y aprovechá el siguiente espacio
-          para expresar cómo te sentís, qué aspiraciones, miedos y desafíos
-          tenés, para que en un tiempo, no muy lejano, puedas reencontrarte con
-          esa versión tuya.
+          deseos personales, aprendizajes y el camino recorrido. Te invitamos a
+          escribirte una carta contándote eso que creés que a tu{' '}
+          <i>&quot;yo del futuro&quot;</i> le gustaría recordar.
         </p>
 
-        <form className="space-y-8">
-          <div className="flex flex-row w-full gap-8">
-            <div className="w-1/2">
-              <label
-                for="name"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Nombre
-              </label>
-              <input
-                type="name"
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={onInputChange}
-                className="shadow-sm bg-gray-50 w-full border border-gray-300 text-gray-900 text-sm rounded-lg w-fullfocus:ring-primary-500 focus:border-primary-500 block p-2.5"
-                placeholder="Como quieras que te llamemos"
-                required
-              />
-            </div>
-            <div className="w-1/2">
-              <label
-                for="name"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
-                Fecha
-              </label>
-              <Datepicker
-                options={options}
-                onChange={handleDateChange}
-                show={show}
-                setShow={handleClose}
-              />{' '}
-            </div>
-          </div>
-          <div>
-            <label
-              for="email"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-            >
-              Email
-            </label>
-            <input
-              type="email"
+        <p className="mb-10 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-center text-sm font-medium text-primary-900">
+          {AVISO_ENTREGA}
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Input
+              id="nombre"
+              label="Nombre"
+              value={form.nombre}
+              onChange={onChange}
+              error={errores.nombre}
+              placeholder="Como quieras que te llamemos"
+              autoComplete="given-name"
+            />
+            <Input
               id="email"
-              name="email"
+              label="Email"
+              type="email"
               value={form.email}
-              onChange={onInputChange}
-              className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
-              placeholder="Al que te enviaremos tu carta en el futuro"
-              required
+              onChange={onChange}
+              error={errores.email}
+              placeholder="tunombre@mail.com"
+              autoComplete="email"
+              ayuda="Acá te mandamos la confirmación."
             />
           </div>
-          <div className="sm:col-span-2">
-            <label
-              for="message"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
-            >
-              Mensaje para el futuro
-            </label>
+
+          <Prompts />
+
+          <Campo id="mensaje" label="Tu carta" error={errores.mensaje}>
             <textarea
-              id="message"
-              rows="6"
-              name="message"
-              value={form.message}
-              onChange={onInputChange}
-              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              placeholder="Escribí acá tu mensaje para el futuro"
-            ></textarea>
-          </div>
-          {error && (
-            <p className="text-red-500 text-sm font-semibold">{error}</p>
-          )}
-          {success ? (
-            <button
-              type="submit"
-              disabled
-              className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-green-600 sm:w-fit hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-primary-300 "
+              id="mensaje"
+              name="mensaje"
+              rows="10"
+              value={form.mensaje}
+              onChange={onChange}
+              maxLength={MAX_MENSAJE}
+              placeholder="Escribile a la persona que vas a ser en unos meses."
+              aria-invalid={errores.mensaje ? 'true' : undefined}
+              className={`block w-full rounded-lg border bg-gray-50 p-2.5 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 ${
+                errores.mensaje ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            <p
+              aria-live="polite"
+              className={`mt-1 text-right text-xs ${
+                restantes <= 100 ? 'text-amber-600' : 'text-gray-500'
+              }`}
             >
-              Mail Programado ✅
-            </button>
-          ) : loading ? (
-            <button
-              disabled
-              type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm py-3 px-5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
-            >
-              <svg
-                aria-hidden="true"
-                role="status"
-                className="inline w-4 h-4 mr-3 text-white animate-spin"
-                viewBox="0 0 100 101"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              {restantes} caracteres disponibles
+            </p>
+          </Campo>
+
+          <fieldset className="space-y-6 rounded-lg border border-gray-200 p-5">
+            <legend className="px-2 text-sm font-semibold text-gray-900">
+              ¿A dónde te la enviamos?
+            </legend>
+
+            <p className="text-sm font-light leading-relaxed text-gray-500">
+              {MICROTEXTO_DIRECCION}
+            </p>
+
+            <Input
+              id="envioNombre"
+              label="Nombre y apellido"
+              value={form.envioNombre}
+              onChange={onChange}
+              error={errores.envioNombre}
+              placeholder="Como figura en tu documento"
+              autoComplete="name"
+            />
+
+            <div className="grid gap-6 sm:grid-cols-3">
+              <Input
+                id="envioCalle"
+                label="Calle y número"
+                value={form.envioCalle}
+                onChange={onChange}
+                error={errores.envioCalle}
+                autoComplete="address-line1"
+                className="sm:col-span-2"
+              />
+              <Input
+                id="envioPisoDepto"
+                label="Piso y depto"
+                value={form.envioPisoDepto}
+                onChange={onChange}
+                opcional
+                autoComplete="address-line2"
+              />
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Input
+                id="envioLocalidad"
+                label="Localidad"
+                value={form.envioLocalidad}
+                onChange={onChange}
+                error={errores.envioLocalidad}
+                autoComplete="address-level2"
+              />
+              <Select
+                id="envioProvincia"
+                label="Provincia"
+                value={form.envioProvincia}
+                onChange={onChange}
+                error={errores.envioProvincia}
+                opciones={PROVINCIAS}
+                placeholder="Elegí una provincia"
+              />
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Input
+                id="envioCp"
+                label="Código postal"
+                value={form.envioCp}
+                onChange={onChange}
+                error={errores.envioCp}
+                inputMode="numeric"
+                placeholder="1425"
+                autoComplete="postal-code"
+              />
+              <Input
+                id="envioTelefono"
+                label="Teléfono"
+                value={form.envioTelefono}
+                onChange={onChange}
+                error={errores.envioTelefono}
+                inputMode="tel"
+                placeholder="11 2345 6789"
+                autoComplete="tel"
+                ayuda="Por si el correo necesita ubicarte."
+              />
+            </div>
+
+            <p className="text-xs text-gray-400">
+              Por ahora enviamos solo dentro de Argentina.
+            </p>
+          </fieldset>
+
+          <div>
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="consentimiento"
+                name="consentimiento"
+                checked={form.consentimiento}
+                onChange={onChange}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label
+                htmlFor="consentimiento"
+                className="text-sm font-light text-gray-600"
               >
-                <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="#E5E7EB"
-                />
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentColor"
-                />
-              </svg>
-              Cargando...
-            </button>
-          ) : (
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 "
+                Acepto que usen mis datos para enviarme esta carta, según el{' '}
+                <a
+                  href="/privacidad"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary-700 underline"
+                >
+                  aviso de privacidad
+                </a>
+                .
+              </label>
+            </div>
+            {errores.consentimiento && (
+              <p className="mt-1 text-xs text-red-600">
+                {errores.consentimiento}
+              </p>
+            )}
+          </div>
+
+          {errorGeneral && (
+            <p
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
             >
-              Programar Mail
-            </button>
+              {errorGeneral}
+            </p>
           )}
+
+          <button
+            type="submit"
+            disabled={enviando}
+            className="w-full rounded-lg bg-primary-700 px-5 py-3 text-center text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          >
+            {enviando ? 'Guardando tu carta...' : 'Enviar mi carta al futuro'}
+          </button>
         </form>
       </div>
     </section>
