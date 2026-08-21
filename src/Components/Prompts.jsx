@@ -13,7 +13,7 @@ export default function Prompts() {
             className="text-sm font-light leading-relaxed text-gray-600"
           >
             <span aria-hidden="true" className="mr-2 text-gray-400">
-              —
+              -
             </span>
             {prompt}
           </li>

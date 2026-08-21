@@ -225,10 +225,6 @@ export default function Form({ origen }) {
               ¿A dónde te la enviamos?
             </legend>
 
-            <p className="text-sm font-light leading-relaxed text-gray-500">
-              {MICROTEXTO_DIRECCION}
-            </p>
-
             <Input
               id="envioNombre"
               label="Nombre y apellido"
@@ -302,10 +298,6 @@ export default function Form({ origen }) {
                 ayuda="Por si el correo necesita ubicarte."
               />
             </div>
-
-            <p className="text-xs text-gray-400">
-              Por ahora enviamos solo dentro de Argentina.
-            </p>
           </fieldset>
 
           <div>
