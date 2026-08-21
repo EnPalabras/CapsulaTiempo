@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Input, Select, Campo, RadioGrupo } from '@/Components/Campos'
+import AutocompleteCalle from '@/Components/AutocompleteCalle'
 import Prompts from '@/Components/Prompts'
 import Confirmacion from '@/Components/Confirmacion'
 import {
@@ -83,6 +84,26 @@ export default function Form({ origen }) {
 
   const restantes = MAX_MENSAJE - form.mensaje.length
   const quierePapel = form.preferencia === 'PAPEL'
+
+  // Cuando elige una sugerencia de Google, la calle viene resuelta y el resto
+  // se completa solo. Lo que Google no trajo queda como estaba, para que lo
+  // pueda cargar a mano.
+  const onElegirDireccion = ({ calle, localidad, provincia, cp }) => {
+    setForm((f) => ({
+      ...f,
+      envioCalle: calle ?? f.envioCalle,
+      envioLocalidad: localidad || f.envioLocalidad,
+      envioProvincia: provincia || f.envioProvincia,
+      envioCp: cp || f.envioCp,
+    }))
+    setErrores((prev) => ({
+      ...prev,
+      envioCalle: undefined,
+      envioLocalidad: localidad ? undefined : prev.envioLocalidad,
+      envioProvincia: provincia ? undefined : prev.envioProvincia,
+      envioCp: cp ? undefined : prev.envioCp,
+    }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -253,13 +274,14 @@ export default function Form({ origen }) {
                 </p>
 
                 <div className="grid gap-6 sm:grid-cols-3">
-                  <Input
+                  <AutocompleteCalle
                     id="envioCalle"
                     label="Calle y número"
                     value={form.envioCalle}
                     onChange={onChange}
+                    onElegir={onElegirDireccion}
                     error={errores.envioCalle}
-                    autoComplete="address-line1"
+                    provincias={PROVINCIAS}
                     className="sm:col-span-2"
                   />
                   <Input
