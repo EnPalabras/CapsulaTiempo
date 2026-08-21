@@ -9,6 +9,7 @@ import {
   AVISO_ENTREGA,
   OPCIONES_FORMATO,
   MICROTEXTO_DIRECCION,
+  CONFIRMACION_ONLINE,
 } from '@/constants/campana'
 
 // NEXT_PUBLIC_API_URL solo hace falta para apuntar a otro lado (un localhost,
@@ -342,6 +343,17 @@ export default function Form({ origen }) {
                   Por ahora enviamos solo dentro de Argentina.
                 </p>
               </fieldset>
+            )}
+
+            {/* Eligió mail: no hay nada que pedirle, pero el lugar no queda
+                vacío. Que algo aparezca confirma que la opción se registró. */}
+            {form.preferencia === 'ONLINE' && (
+              <p
+                aria-live="polite"
+                className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-light text-gray-600"
+              >
+                {CONFIRMACION_ONLINE}
+              </p>
             )}
 
             <div>

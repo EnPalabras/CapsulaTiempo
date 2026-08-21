@@ -66,6 +66,10 @@ export const OPCIONES_FORMATO = [
   },
 ]
 
+// Lo que ve en el lugar del bloque de dirección quien eligió recibirla por mail.
+export const CONFIRMACION_ONLINE =
+  'Perfecto. Tu carta te va a llegar a tu email en los primeros días de enero.'
+
 export const MICROTEXTO_DIRECCION =
   `Pedimos tu dirección porque elegiste ser una de las ${CUPO_PAPEL} personas ` +
   'que reciben la carta impresa. Si el cupo se completa antes de que termines ' +
