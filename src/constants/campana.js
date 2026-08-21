@@ -3,6 +3,11 @@
 
 export const MAX_MENSAJE = 2000
 
+// Solo para el copy. El cupo de verdad lo controla LIMITE_PAPEL en el backend
+// (server_en_palabras, src/app/api/carta-futuro/route.ts). Si cambia uno,
+// cambiar el otro o los textos van a mentir.
+export const CUPO_PAPEL = 100
+
 export const PROVINCIAS = [
   'Buenos Aires',
   'Ciudad Autónoma de Buenos Aires',
@@ -47,10 +52,24 @@ export const PROMPTS = [
 ]
 
 export const AVISO_ENTREGA =
-  'Tu carta te llega en los primeros días de enero. No se puede elegir la fecha.'
+  `Solo las primeras ${CUPO_PAPEL} cartas se envían impresas por correo. ` +
+  'El resto también llega, pero por mail. Todas, en los primeros días de enero.'
+
+export const OPCIONES_FORMATO = [
+  {
+    valor: 'PAPEL',
+    label: `Quiero ser una de las ${CUPO_PAPEL} personas que la reciben impresa, por correo, en su casa.`,
+  },
+  {
+    valor: 'ONLINE',
+    label: 'Prefiero recibirla por mail, sin compartir mi dirección.',
+  },
+]
 
 export const MICROTEXTO_DIRECCION =
-  'Te pedimos la dirección porque las primeras cartas viajan en papel, por correo. Si entrás en ese grupo, te llega impresa a tu casa. Si no, te llega por mail. Te lo confirmamos al terminar.'
+  `Pedimos tu dirección porque elegiste ser una de las ${CUPO_PAPEL} personas ` +
+  'que reciben la carta impresa. Si el cupo se completa antes de que termines ' +
+  'de enviarla, no te quedás sin carta: te llega igual, pero por mail.'
 
 // Poner en false el 05/09 para mostrar la pantalla de cerrado.
 // El backend tiene su propia constante: esta decide qué se ve, la del server
