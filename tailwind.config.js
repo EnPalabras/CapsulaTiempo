@@ -22,6 +22,8 @@ module.exports = {
         tinta: '#301E11',
         // Único gris del diseño: el borde de los campos.
         borde: '#B7B0AB',
+        // El fondo de la cajita del aviso, en la pantalla de la carta.
+        arena: '#ECE4DC',
       },
       fontFamily: {
         // Solo para el titular. Ver el @font-face en globals.css: hay un único

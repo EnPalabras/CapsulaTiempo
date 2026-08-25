@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { validarEnvio } from '@/lib/carta'
+import { validarEnvio, validarPersona } from '@/lib/carta'
 import { Input, Select } from '@/Components/Campos'
 import AutocompleteCalle from '@/Components/AutocompleteCalle'
 import {
   CONFIRMACION_ONLINE,
   CUPO_COMPLETO,
   MICROTEXTO_DIRECCION,
+  DATOS,
   OPCIONES_FORMATO,
   PASO_ENTREGA,
   PROVINCIAS,
@@ -20,6 +21,30 @@ const ENVIO_INICIAL = {
   envioTelefono: '',
 }
 
+function Campo({ campo, valor, onCambiar, error }) {
+  return (
+    <label className="block w-full text-left">
+      <span className="text-[14px] font-normal">{campo.label}</span>
+      <input
+        id={campo.clave}
+        name={campo.clave}
+        type={campo.tipo}
+        autoComplete={campo.autoComplete}
+        value={valor}
+        onChange={(e) => onCambiar(e.target.value)}
+        placeholder={campo.placeholder}
+        aria-invalid={error ? 'true' : undefined}
+        className="mt-2 w-full rounded-xl border border-borde bg-white px-5 py-4 font-sans text-[16px] font-light text-black outline-none placeholder:text-borde focus:border-tinta focus:ring-0"
+      />
+      {error && (
+        <span className="mt-1 block text-[13px] font-light text-red-600">
+          {error}
+        </span>
+      )}
+    </label>
+  )
+}
+
 export default function Entrega({
   onEnviar,
   enviando,
@@ -27,14 +52,12 @@ export default function Entrega({
   errorGeneral,
   cupoPapel,
 }) {
+  const [persona, setPersona] = useState({ nombre: '', email: '' })
   const [preferencia, setPreferencia] = useState('')
   const [envio, setEnvio] = useState(ENVIO_INICIAL)
   const [consentimiento, setConsentimiento] = useState(false)
   const [erroresLocales, setErroresLocales] = useState({})
 
-  // Sin cupo hay una sola opción, y hacerla elegir no aporta nada: viene
-  // marcada. Va en un efecto porque el cupo se sabe después del primer render,
-  // cuando contesta el server.
   useEffect(() => {
     if (!cupoPapel) setPreferencia('ONLINE')
   }, [cupoPapel])
@@ -44,21 +67,30 @@ export default function Entrega({
     : OPCIONES_FORMATO.filter((o) => o.valor !== 'PAPEL')
 
   const quierePapel = preferencia === 'PAPEL'
-  const listo = Boolean(preferencia) && consentimiento && !enviando
-  // Lo que encontramos acá y lo que devolvió el server se muestran igual.
+  const listo =
+    Boolean(preferencia) &&
+    consentimiento &&
+    persona.nombre.trim().length > 0 &&
+    persona.email.trim().length > 0 &&
+    !enviando
+
   const errores = { ...erroresLocales, ...erroresServidor }
+  const onPersona = (clave) => (valor) => {
+    setPersona((previos) => ({ ...previos, [clave]: valor }))
+    setErroresLocales((previos) =>
+      previos[clave] ? { ...previos, [clave]: undefined } : previos
+    )
+  }
 
   const onChange = (e) => {
     const { name, value } = e.target
     setEnvio((previos) => ({ ...previos, [name]: value }))
-    // Se limpia el error del campo al tocarlo, no el del form entero.
+
     setErroresLocales((previos) =>
       previos[name] ? { ...previos, [name]: undefined } : previos
     )
   }
 
-  // Cuando elige una sugerencia de Google, la calle viene resuelta y el resto
-  // se completa solo. Lo que Google no trajo queda como estaba.
   const onElegirDireccion = ({ calle, localidad, provincia, cp }) => {
     setEnvio((previos) => ({
       ...previos,
@@ -77,27 +109,26 @@ export default function Entrega({
           e.preventDefault()
           if (!listo) return
 
-          const encontrados = quierePapel ? validarEnvio(envio) : {}
+          const encontrados = {
+            ...validarPersona(persona),
+            ...(quierePapel ? validarEnvio(envio) : {}),
+          }
           if (Object.keys(encontrados).length > 0) {
             setErroresLocales(encontrados)
-            // El foco va al primer campo con problema.
+
             document.getElementById(Object.keys(encontrados)[0])?.focus()
             return
           }
 
           setErroresLocales({})
-          onEnviar({ preferencia, envio, consentimiento })
+          onEnviar({ ...persona, preferencia, envio, consentimiento })
         }}
       >
-        {/* italic junto con font-ivy: es el único corte que tenemos. */}
+
         <h2 className="font-ivy text-[32px] font-medium italic leading-[1.15] md:text-[48px]">
           {PASO_ENTREGA.titulo}
         </h2>
 
-        {/* Este render va recortado al sobre: es la única vez que aparece y no
-            se encadena con ningún video, así que no necesita el aire de arriba
-            que comparten los demás. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/sobre-cerrado.webp"
           alt=""
@@ -124,8 +155,7 @@ export default function Entrega({
                 value={opcion.valor}
                 checked={preferencia === opcion.valor}
                 onChange={(e) => setPreferencia(e.target.value)}
-                // El relleno del radio de flowbite es `currentColor`: con
-                // text-black queda negro en vez del azul que trae de fábrica.
+
                 className="mt-0.5 h-5 w-5 shrink-0 border-borde text-black accent-black focus:ring-0"
               />
               <span className="text-[16px] font-light">{opcion.label}</span>
@@ -133,16 +163,27 @@ export default function Entrega({
           ))}
         </div>
 
-        {/* El bloque de dirección es el que ya estaba, tal cual, con su estilo
-            viejo. Queda para tunear cuando definamos cómo se ve acá adentro. */}
+        <div className="mt-6 grid w-full gap-4 sm:grid-cols-2">
+          <Campo
+            campo={DATOS.nombre}
+            valor={persona.nombre}
+            onCambiar={onPersona('nombre')}
+            error={errores.nombre}
+          />
+          <Campo
+            campo={DATOS.email}
+            valor={persona.email}
+            onCambiar={onPersona('email')}
+            error={errores.email}
+          />
+        </div>
+
         {quierePapel && (
           <fieldset className="mt-6 w-full space-y-6 rounded-xl border border-borde p-5 text-left">
             <legend className="px-2 text-base font-semibold text-tinta">
               ¿A dónde te la enviamos?
             </legend>
 
-            {/* El !mt-0 le gana al space-y-6 del fieldset, que si no le mete
-                margen arriba por venir después del legend. */}
             <p className="!mt-0 text-sm font-light leading-relaxed text-gray-500">
               {MICROTEXTO_DIRECCION}
             </p>
@@ -218,8 +259,6 @@ export default function Entrega({
           </fieldset>
         )}
 
-        {/* Eligió mail: no hay nada que pedirle, pero el lugar no queda vacío.
-            Que algo aparezca confirma que la opción se registró. */}
         {preferencia === 'ONLINE' && (
           <p
             aria-live="polite"

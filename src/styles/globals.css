@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Del Gotham tenemos un solo archivo, el Book (su metadata dice
-   usWeightClass 325, de ahí el 325 del Figma). Se declara como 400: los 300
-   del diseño caen en esta misma cara —el navegador no inventa un light— y el
-   500 del botón lo engorda por software. Si algún día llegan el Light y el
-   Medium de verdad, se agregan como reglas aparte con su peso exacto. */
 @font-face {
   font-family: 'Gotham';
   src: url('/fonts/Gotham-Book.otf') format('opentype');
@@ -15,10 +10,6 @@
   font-display: swap;
 }
 
-/* De IvyBodoni tenemos solo el Medium Italic, así que se declara con ese peso
-   y ese estilo: pedirle a la familia otra combinación devuelve una versión
-   sintética (inclinada por software) que se nota. Usar siempre `font-ivy`
-   junto con `italic`, como en el título de la portada. */
 @font-face {
   font-family: 'IvyBodoni';
   src: url('/fonts/IvyBodoni-MediumItalic.otf') format('opentype');
@@ -28,21 +19,13 @@
 }
 
 @layer components {
-  /* Los cuatro assets del sobre (las dos imágenes y los dos videos) comparten
-     un mismo lienzo de 1232x1700: el sobre está siempre en el mismo lugar y lo
-     único que se mueve es el papel o la solapa. Eso permite encadenarlos —
-     imagen abierta → video del papel saliendo → imagen cerrada— sin ningún
-     salto, pero deja 84px de aire arriba, que es hasta donde llega el papel
-     cuando sale del todo. Ese aire hace falta para la animación, pero no tiene
-     que empujar al sobre hacia abajo en el layout: eso es lo que descuenta
-     esta clase.
-
-     Va en porcentaje porque un margen vertical en % se resuelve contra el
-     ANCHO del contenedor: así el ajuste escala junto con el asset, sin media
-     queries. Los defaults son los del lienzo; si algún día llega un render con
-     otro encuadre, se le pasan los suyos con
-     style={{ '--aire': 84, '--ancho': 1232 }} en píxeles del archivo. */
   .sobre {
     margin-top: calc(-100% * var(--aire, 84) / var(--ancho, 1232));
+  }
+
+  .una-pantalla {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
   }
 }

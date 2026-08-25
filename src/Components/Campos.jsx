@@ -1,6 +1,3 @@
-// Los estilos de input estaban repetidos en cada campo del form viejo. Con 12
-// campos ya no daba, así que quedan acá una sola vez.
-
 const claseInput =
   'shadow-sm bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-primary-500 focus:border-primary-500'
 

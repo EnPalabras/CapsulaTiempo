@@ -40,6 +40,40 @@ Para separar puntos de pegado del mismo cartel va `utm_content` en la
 querystring, que pisa el default: `/c/qr-diseno?utm_content=palermo`. Los cuatro
 utm_* se pueden pisar así.
 
+## Detalles que muerden
+
+El código no lleva comentarios, así que lo que no se deduce leyéndolo queda acá.
+
+- **Los renders del sobre comparten un lienzo de 1232x1700** para poder
+  encadenar imagen y video sin saltos, y eso deja aire muerto arriba. La clase
+  `.sobre` lo descuenta del layout con un margen negativo en porcentaje, porque
+  un margen vertical en `%` se resuelve contra el **ancho** y así el ajuste
+  escala solo. Cada uso pasa su valor en `--aire`: la animación de apertura solo
+  puede descontar 84 (hasta ahí sube el papel; más que eso se dibuja encima del
+  logo), la de cierre descuenta 402 (deja centrado el cuerpo del sobre, que es
+  lo único que no se mueve).
+- **`.una-pantalla` declara el alto dos veces**, `100vh` y después `100dvh`. En
+  un celular `100vh` se mide como si la barra del navegador no existiera, así
+  que sin el `dvh` la última línea de la portada queda tapada; el `vh` es el
+  respaldo para los navegadores que todavía no lo entienden. No borrar ninguna
+  de las dos.
+- **En la portada, la imagen es lo único elástico** (`flex-1` + `min-h-0`): la
+  sección tiene `overflow-hidden` por los bordes redondeados, así que lo que no
+  entra no scrollea, se recorta. Que la imagen ceda primero es lo que evita que
+  se coma el título o la letra chica en pantallas bajas.
+- **Los videos arrancan con `el.muted = true` a mano.** React no escribe el
+  atributo `muted` en el HTML del server, así que al hidratar el video queda con
+  sonido y la política de autoplay rechaza el `play()`.
+- **Cada video tiene un temporizador de respaldo en `Flujo`.** Si el `play()`
+  falla, nadie dispara el `onEnded` y el flujo se queda clavado para siempre.
+- **El botón de la portada es `relative z-10`.** Monta sobre la imagen, y sin
+  posicionar, una imagen en flujo se dibuja en una etapa posterior al fondo de
+  sus hermanos y lo taparía.
+- **El input pide `focus:ring-0`.** El plugin de Flowbite le mete un ring azul
+  de 1px a todos los campos en foco, que a ojo es indistinguible de un borde.
+- **Si el endpoint de cupo no contesta, se ofrecen las dos opciones de entrega.**
+  Es mejor pedir una dirección de más que esconder el papel habiendo cupo.
+
 ## Cómo está armado
 
 `Flujo.jsx` es el que manda: guarda en qué paso estás y funde entre pantallas.

@@ -1,7 +1,5 @@
 import Head from 'next/head'
 
-// PLACEHOLDER — reemplazar por el aviso de privacidad que redactan ellas.
-// El checkbox de consentimiento linkea acá, así que no puede quedar vacío.
 export default function Privacidad() {
   return (
     <>

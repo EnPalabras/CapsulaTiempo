@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Campo } from '@/Components/Campos'
 
-// Key de browser: va en el bundle y es publica por diseño. Lo que la protege es
-// la restriccion por referrer y el cap de cuota en la consola de Google.
 const KEY =
   process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY ??
   'AIzaSyDdnq_nT018z-HfUerlgtzGLUZrNdz0Pik'
@@ -13,9 +11,6 @@ const DETALLE = (placeId) => `https://places.googleapis.com/v1/places/${placeId}
 const MINIMO = 4
 const ESPERA = 350
 
-// Google devuelve la provincia con variantes que no matchean nuestro select.
-// Si ninguna coincide dejamos el campo vacio para que elija: preferimos que
-// complete un dato a mano antes que cargarle una provincia equivocada.
 const ALIAS_PROVINCIA = {
   caba: 'Ciudad Autónoma de Buenos Aires',
   'capital federal': 'Ciudad Autónoma de Buenos Aires',
@@ -28,7 +23,7 @@ const ALIAS_PROVINCIA = {
 
 function normalizarProvincia(texto, provincias) {
   if (!texto) return ''
-  // "Provincia de Buenos Aires" -> "Buenos Aires"
+
   const limpio = texto.replace(/^provincia\s+de\s+/i, '').trim()
   const exacta = provincias.find(
     (p) => p.toLowerCase() === limpio.toLowerCase()
@@ -38,7 +33,6 @@ function normalizarProvincia(texto, provincias) {
   const alias = ALIAS_PROVINCIA[limpio.toLowerCase()]
   if (alias && provincias.includes(alias)) return alias
 
-  // Ultimo intento: que empiece igual ("Tierra del Fuego, Antártida...").
   const parcial = provincias.find(
     (p) =>
       limpio.toLowerCase().startsWith(p.toLowerCase()) ||
@@ -57,19 +51,14 @@ function armarDatos(componentes, provincias) {
 
   const calle = texto('route')
   const numero = texto('street_number')
-
-  // En Argentina el numero va despues de la calle.
   const linea = [calle, numero].filter(Boolean).join(' ')
 
-  // CABA manda el barrio en sublocality y la ciudad en locality; el interior
-  // suele traer la localidad en locality y el partido en el nivel 2.
   const localidad =
     texto('locality') ||
     texto('administrative_area_level_2') ||
     texto('sublocality_level_1') ||
     texto('sublocality')
 
-  // Puede venir como CPA ("C1425DGH"): nos quedamos con los 4 digitos.
   const cpCrudo = texto('postal_code')
   const digitos = cpCrudo.replace(/\D/g, '')
   const cp = digitos.length >= 4 ? digitos.slice(0, 4) : digitos
@@ -99,12 +88,8 @@ export default function AutocompleteCalle({
   const [abierto, setAbierto] = useState(false)
   const [resaltada, setResaltada] = useState(-1)
   const [buscando, setBuscando] = useState(false)
-
-  // Un token por sesion de busqueda. Cerrarla con el detalle es lo que hace que
-  // las pulsaciones caigan en el SKU gratis en vez de cobrarse por request.
   const token = useRef(null)
   const contenedor = useRef(null)
-  // Para descartar respuestas que llegan fuera de orden.
   const ultimaBusqueda = useRef(0)
 
   useEffect(() => {
@@ -160,8 +145,6 @@ export default function AutocompleteCalle({
         setAbierto(items.length > 0)
         setResaltada(-1)
       } catch (e) {
-        // Si Google falla el campo sigue siendo un input de texto comun: nadie
-        // se queda sin poder cargar su direccion por esto.
         console.warn('[autocomplete] no pudimos buscar sugerencias:', e.message)
         setSugerencias([])
         setAbierto(false)
@@ -188,14 +171,13 @@ export default function AutocompleteCalle({
       const data = await res.json()
 
       const datos = armarDatos(data.addressComponents ?? [], provincias)
-      // Si Google no trajo la calle nos quedamos con lo que eligió la persona.
+
       onElegir({ ...datos, calle: datos.calle || sug.principal })
     } catch (e) {
       console.warn('[autocomplete] no pudimos traer el detalle:', e.message)
-      // Al menos dejamos la calle que eligió; el resto lo completa a mano.
+
       onElegir({ calle: sug.principal })
     } finally {
-      // El detalle cierra la sesión: la próxima búsqueda arranca una nueva.
       token.current = null
     }
   }

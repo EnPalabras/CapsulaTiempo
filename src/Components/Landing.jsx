@@ -15,10 +15,6 @@ export default function Landing({ abierta, origen }) {
         <meta name="description" content={DESCRIPCION} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        {/* Se llega solo por QR o por DM: no queremos esta página en buscadores.
-            Open Graph es otra cosa — los scrapers de WhatsApp, Instagram y
-            Twitter leen estas etiquetas y no miran `robots`, así que el link
-            compartido por DM muestra una preview igual. */}
         <meta name="robots" content="noindex, nofollow" />
 
         <meta property="og:type" content="website" />
@@ -27,9 +23,7 @@ export default function Landing({ abierta, origen }) {
         <meta property="og:title" content={TITULO} />
         <meta property="og:description" content={DESCRIPCION} />
         <meta property="og:url" content={SITIO} />
-        {/* Absoluta y PNG a proposito: los scrapers no resuelven rutas
-            relativas, y el soporte de WebP en las previews es irregular
-            (WhatsApp historicamente no la renderiza). */}
+
         <meta property="og:image" content={`${SITIO}/og.png`} />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
