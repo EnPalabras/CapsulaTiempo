@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import Portada from '@/Components/Portada'
-import Animacion from '@/Components/Animacion'
+import Animacion, { respaldoDe } from '@/Components/Animacion'
 import Carta from '@/Components/Carta'
 import Entrega from '@/Components/Entrega'
 import Confirmacion from '@/Components/Confirmacion'
 import { consultarCupo, enviarCarta } from '@/lib/carta'
 
 const FUNDIDO = 500
-const APERTURA = 3400
-const CIERRE = 2200
 
 export default function Flujo({ origen }) {
   const [paso, setPaso] = useState('portada')
@@ -64,12 +62,12 @@ export default function Flujo({ origen }) {
   function empezar() {
     if (!visible) return
     fundir(() => setPaso('abriendo'))
-    arrancarVideo('carta', APERTURA)
+    arrancarVideo('carta', FUNDIDO + respaldoDe('abriendo'))
   }
 
   function cerrar() {
     fundir(() => setPaso('cerrando'))
-    arrancarVideo('entrega', CIERRE)
+    arrancarVideo('entrega', FUNDIDO + respaldoDe('cerrando'))
   }
 
   async function enviar({ nombre, email, preferencia, envio, consentimiento }) {

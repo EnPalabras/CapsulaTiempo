@@ -1,15 +1,16 @@
 import { useEffect, useRef } from 'react'
 
 const ANIMACIONES = {
-  abriendo: { archivo: 'sobre-abriendo', aire: 84 },
-  cerrando: { archivo: 'sobre-cerrando', aire: 402 },
+  abriendo: { archivo: 'sobre-abriendo', duracion: 1458 },
+  cerrando: { archivo: 'sobre-cerrando', duracion: 1125 },
 }
 
+const AIRE = 384
 const RETRASO = 500
 
 export default function Animacion({ cual, onTerminada }) {
   const video = useRef(null)
-  const { archivo, aire } = ANIMACIONES[cual]
+  const { archivo } = ANIMACIONES[cual]
 
   useEffect(() => {
     const el = video.current
@@ -24,7 +25,7 @@ export default function Animacion({ cual, onTerminada }) {
   return (
     <section className="flex flex-1 items-center justify-center">
       <div className="w-full max-w-[700px] md:w-[36vw]">
-        <div className="sobre" style={{ '--aire': aire }}>
+        <div className="sobre" style={{ '--aire': AIRE }}>
           <video
             key={cual}
             ref={video}
@@ -43,4 +44,8 @@ export default function Animacion({ cual, onTerminada }) {
       </div>
     </section>
   )
+}
+
+export function respaldoDe(cual) {
+  return RETRASO + ANIMACIONES[cual].duracion + 900
 }

@@ -45,13 +45,18 @@ utm_* se pueden pisar así.
 El código no lleva comentarios, así que lo que no se deduce leyéndolo queda acá.
 
 - **Los renders del sobre comparten un lienzo de 1232x1700** para poder
-  encadenar imagen y video sin saltos, y eso deja aire muerto arriba. La clase
-  `.sobre` lo descuenta del layout con un margen negativo en porcentaje, porque
-  un margen vertical en `%` se resuelve contra el **ancho** y así el ajuste
-  escala solo. Cada uso pasa su valor en `--aire`: la animación de apertura solo
-  puede descontar 84 (hasta ahí sube el papel; más que eso se dibuja encima del
-  logo), la de cierre descuenta 402 (deja centrado el cuerpo del sobre, que es
-  lo único que no se mueve).
+  encadenar imagen y video sin saltos, y eso deja aire muerto arriba y abajo. La
+  clase `.sobre` lo descuenta del layout con un margen negativo en porcentaje,
+  porque un margen vertical en `%` se resuelve contra el **ancho** y así el
+  ajuste escala solo. El valor va en `--aire`: 384 es la diferencia entre el
+  aire de arriba y el de abajo, medida sobre todos los frames de las dos
+  animaciones (473 y 93 en la de apertura, 487 y 98 en la de cierre), así el
+  sobre queda centrado en su caja. Si llegan renders con otro encuadre, hay que
+  volver a medirlo.
+- **El fondo de la portada tiene dos versiones**, horizontal y vertical, y se
+  elige por `matchMedia` en el cliente para bajar una sola. El poster va además
+  como `background-image` con media query, así hay fondo desde el primer pintado
+  sin esperar al video ni bajar los dos.
 - **`.una-pantalla` declara el alto dos veces**, `100vh` y después `100dvh`. En
   un celular `100vh` se mide como si la barra del navegador no existiera, así
   que sin el `dvh` la última línea de la portada queda tapada; el `vh` es el
