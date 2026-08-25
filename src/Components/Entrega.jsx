@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { validarEnvio } from '@/lib/carta'
 import { Input, Select } from '@/Components/Campos'
 import AutocompleteCalle from '@/Components/AutocompleteCalle'
 import {
   CONFIRMACION_ONLINE,
+  CUPO_COMPLETO,
   MICROTEXTO_DIRECCION,
   OPCIONES_FORMATO,
   PASO_ENTREGA,
@@ -19,11 +20,28 @@ const ENVIO_INICIAL = {
   envioTelefono: '',
 }
 
-export default function Entrega({ onEnviar, enviando, erroresServidor, errorGeneral }) {
+export default function Entrega({
+  onEnviar,
+  enviando,
+  erroresServidor,
+  errorGeneral,
+  cupoPapel,
+}) {
   const [preferencia, setPreferencia] = useState('')
   const [envio, setEnvio] = useState(ENVIO_INICIAL)
   const [consentimiento, setConsentimiento] = useState(false)
   const [erroresLocales, setErroresLocales] = useState({})
+
+  // Sin cupo hay una sola opción, y hacerla elegir no aporta nada: viene
+  // marcada. Va en un efecto porque el cupo se sabe después del primer render,
+  // cuando contesta el server.
+  useEffect(() => {
+    if (!cupoPapel) setPreferencia('ONLINE')
+  }, [cupoPapel])
+
+  const opciones = cupoPapel
+    ? OPCIONES_FORMATO
+    : OPCIONES_FORMATO.filter((o) => o.valor !== 'PAPEL')
 
   const quierePapel = preferencia === 'PAPEL'
   const listo = Boolean(preferencia) && consentimiento && !enviando
@@ -88,8 +106,14 @@ export default function Entrega({ onEnviar, enviando, erroresServidor, errorGene
           className="mt-6 w-full max-w-[300px]"
         />
 
+        {!cupoPapel && (
+          <p className="mt-6 w-full text-left text-[14px] font-light">
+            {CUPO_COMPLETO}
+          </p>
+        )}
+
         <div className="mt-6 w-full space-y-3">
-          {OPCIONES_FORMATO.map((opcion) => (
+          {opciones.map((opcion) => (
             <label
               key={opcion.valor}
               className="flex cursor-pointer items-start gap-3 rounded-xl border border-borde bg-white p-4 text-left"

@@ -4,7 +4,7 @@
 export const MAX_MENSAJE = 2000
 
 // Solo para el copy. El cupo de verdad lo controla LIMITE_PAPEL en el backend
-// (server_en_palabras, src/app/api/carta-futuro/route.ts). Si cambia uno,
+// (server_en_palabras, src/lib/carta-futuro/campana.ts). Si cambia uno,
 // cambiar el otro o los textos van a mentir.
 export const CUPO_PAPEL = 100
 
@@ -160,6 +160,12 @@ export const OPCIONES_FORMATO = [
     label: 'Prefiero recibirla por mail, sin compartir mi dirección.',
   },
 ]
+
+// Cuando el cupo de papel ya se completó, la opción de la carta impresa no se
+// ofrece: en su lugar va esto.
+export const CUPO_COMPLETO =
+  `Las ${CUPO_PAPEL} cartas impresas ya están reservadas, así que esta vez la ` +
+  'tuya viaja por mail. Llega en enero igual.'
 
 // Lo que ve en el lugar del bloque de dirección quien eligió recibirla por mail.
 export const CONFIRMACION_ONLINE =

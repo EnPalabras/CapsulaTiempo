@@ -6,7 +6,7 @@ import Cerrando from '@/Components/Cerrando'
 import Entrega from '@/Components/Entrega'
 import Confirmacion from '@/Components/Confirmacion'
 import { CAMPOS } from '@/constants/campana'
-import { enviarCarta } from '@/lib/carta'
+import { consultarCupo, enviarCarta } from '@/lib/carta'
 
 // Milisegundos del fundido. Tiene que coincidir con el `duration-500` de las
 // clases: primero se apaga lo que está, recién ahí se cambia y se prende lo
@@ -34,6 +34,8 @@ export default function Flujo({ origen }) {
   const [erroresServidor, setErroresServidor] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [resultado, setResultado] = useState(null)
+  // null = todavía no sabemos si queda cupo de papel.
+  const [cupo, setCupo] = useState(null)
   // Dos fundidos distintos: salir de la portada cambia la pantalla entera, pero
   // pasar de nombre a e-mail cambia solo el campo —el sobre se queda quieto.
   const [panelVisible, setPanelVisible] = useState(true)
@@ -51,6 +53,22 @@ export default function Flujo({ origen }) {
     },
     []
   )
+
+  // Se pregunta al entrar a escribir la carta y no al llegar a la entrega:
+  // desde acá hay minutos de margen, así que la respuesta llega mucho antes de
+  // que la pantalla se muestre y las opciones no parpadean. El dato queda un
+  // rato viejo, pero la carrera por el último lugar la resuelve el backend, que
+  // degrada a mail solo.
+  useEffect(() => {
+    if (paso !== 'carta') return
+    let vivo = true
+    consultarCupo().then((datos) => {
+      if (vivo) setCupo(datos)
+    })
+    return () => {
+      vivo = false
+    }
+  }, [paso])
 
   function fundir(prender, cambio) {
     prender(false)
@@ -193,6 +211,9 @@ export default function Flujo({ origen }) {
             enviando={enviando}
             erroresServidor={erroresServidor}
             errorGeneral={errorGeneral}
+            // Si no pudimos preguntar, se ofrecen las dos opciones: es mejor
+            // pedir una dirección de más que esconder el papel habiendo cupo.
+            cupoPapel={cupo ? cupo.disponible : true}
           />
         ) : paso === 'listo' ? (
           <Confirmacion {...resultado} />

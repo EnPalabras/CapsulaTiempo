@@ -65,3 +65,24 @@ export async function enviarCarta(cuerpo) {
     }
   }
 }
+
+// Cuántas cartas impresas quedan. Devuelve null para cualquier problema —el
+// endpoint caído, sin conexión, una respuesta rara— y ese null significa "no
+// sé": la landing muestra las dos opciones, que es lo que hacía antes de que
+// esto existiera. Nunca frena el flujo.
+export async function consultarCupo() {
+  try {
+    const control = new AbortController()
+    const reloj = setTimeout(() => control.abort(), 4000)
+    const res = await fetch(`${API}/api/carta-futuro/cupo`, {
+      signal: control.signal,
+    })
+    clearTimeout(reloj)
+
+    if (!res.ok) return null
+    const data = await res.json()
+    return typeof data?.disponible === 'boolean' ? data : null
+  } catch {
+    return null
+  }
+}
