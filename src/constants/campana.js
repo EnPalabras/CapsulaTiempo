@@ -35,25 +35,120 @@ export const PROVINCIAS = [
   'Tucumán',
 ]
 
+// Todo entra bajo la misma campaña, así los tres orígenes suman juntos en
+// analytics y se pueden comparar entre sí.
+export const CAMPANA = 'carta-futuro'
+
 // Orígenes válidos para /c/[origen]. Cualquier otro da 404, así no se indexa
 // basura ni se inventan URLs.
-export const ORIGENES = {
-  qr: { utm_source: 'cartel', utm_medium: 'qr' },
-  dm: { utm_source: 'instagram', utm_medium: 'dm' },
+//
+// La regla es que el origen se llame igual en los tres lugares: en la URL, en
+// el utm_source y en la columna `origen` de la base. Sin tabla de traducción no
+// hay nada que se pueda desincronizar.
+//
+//   /c/web         el link en la web, el perfil, la bio
+//   /c/qr-diseno   el QR metido en una pieza diseñada (afiche, flyer, vidriera)
+//   /c/qr-simple   el QR solo, sin pieza alrededor
+//
+// El utm_content queda libre a propósito: es el que distingue puntos de pegado
+// (/c/qr-diseno?utm_content=palermo) y por eso no se usa para nada más.
+// Atajos para los QR: la misma entrada con una URL más corta, que entra en un
+// QR con menos módulos y por lo tanto más grandes y más fáciles de escanear
+// chico. Se resuelven al origen de verdad antes de cualquier otra cosa, así que
+// en las UTM y en la base queda `qr-simple`, nunca `qs`: usar el atajo no parte
+// los datos en dos.
+export const ALIAS = {
+  qd: 'qr-diseno',
+  qs: 'qr-simple',
 }
 
-// PLACEHOLDER — reemplazar por los prompts de los journals que manda Lou.
-export const PROMPTS = [
-  '¿Qué es lo que más te sorprendería de vos misma en un año?',
-  '¿Qué te querés acordar de este momento exacto de tu vida?',
-  '¿Qué le agradecerías a la persona que sos hoy?',
-  '¿Qué miedo te gustaría haber dejado atrás?',
-  '¿Qué estás aprendiendo que no querés olvidar?',
-]
+export const ORIGENES = {
+  web: {
+    utm_source: 'web',
+    utm_medium: 'web',
+    utm_campaign: CAMPANA,
+  },
+  'qr-diseno': {
+    utm_source: 'qr-diseno',
+    utm_medium: 'qr',
+    utm_campaign: CAMPANA,
+  },
+  'qr-simple': {
+    utm_source: 'qr-simple',
+    utm_medium: 'qr',
+    utm_campaign: CAMPANA,
+  },
+}
 
-export const AVISO_ENTREGA =
-  `Solo las primeras ${CUPO_PAPEL} cartas se envían impresas por correo. ` +
-  'El resto también llega, pero por mail. Todas, en los primeros días de enero.'
+// Portada. El titular va en IvyBodoni y el resto en Gotham; los tamaños viven
+// en el componente, acá solo el texto.
+export const PORTADA = {
+  intro:
+    'Los días pasan tan rápido que es muy fácil perder de vista nuestros ' +
+    'deseos personales, aprendizajes y el camino recorrido.',
+  titulo: '¿Qué te gustaría decirle a tu “yo del futuro”?',
+  invitacion:
+    'Te invitamos a escribirte una carta contándote eso que creés que a tu ' +
+    '“yo del futuro” le gustaría recordar.',
+  cta: 'Escribir carta',
+  // Dos renglones a propósito: se renderizan como dos líneas, no como un
+  // párrafo que corta donde le toque.
+  aviso: [
+    `Solo las primeras ${CUPO_PAPEL} cartas se envían impresas por correo.`,
+    'El resto también llega, pero por mail. Todas, en Enero de 2027.',
+  ],
+}
+
+// Un e-mail con forma de e-mail. Mismo criterio que el backend: alcanza con
+// que tenga arroba y un punto después.
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Los pasos de datos, en orden. Todos se ven igual —pregunta, input, botón—
+// así que cambian solo estos textos. La clave es además la del valor guardado.
+export const CAMPOS = {
+  nombre: {
+    clave: 'nombre',
+    tipo: 'text',
+    autoComplete: 'given-name',
+    pregunta: '¿Cómo te llamás?',
+    placeholder: 'Ingresá tu nombre o apodo',
+    cta: 'Siguiente',
+    valido: (v) => v.trim().length > 0,
+    error: 'Contanos cómo te llamás',
+  },
+  email: {
+    clave: 'email',
+    tipo: 'email',
+    autoComplete: 'email',
+    pregunta: 'Tu e-mail',
+    placeholder: 'Ingresá tu e-mail',
+    cta: 'Comenzá a escribir',
+    // Sin esto, un "asdasd" pasa de largo y el error recién aparece al final,
+    // en una pantalla donde ya no se puede corregir.
+    valido: (v) => EMAIL.test(v.trim()),
+    error: 'Revisá el e-mail, parece incompleto',
+  },
+}
+
+// Lo que se escribe sobre el sobre y al costado de la carta.
+export const ETIQUETAS = {
+  para: 'Para:',
+  nombre: 'Nombre:',
+  email: 'Email:',
+}
+
+// Último paso: la carta.
+export const PASO_CARTA = {
+  titulo: 'Escribí tu carta',
+  cta: 'Enviar',
+}
+
+// Y el cierre: cómo la quiere recibir.
+export const PASO_ENTREGA = {
+  titulo: '¿Cómo querés recibir tu carta?',
+  cta: 'Enviar mi carta al futuro',
+  enviando: 'Enviando…',
+}
 
 export const OPCIONES_FORMATO = [
   {

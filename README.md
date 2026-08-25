@@ -1,38 +1,56 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Carta a tu yo del futuro
 
-## Getting Started
+Landing de la acción de En Palabras: escribís una carta, elegís si la querés
+recibir impresa o por mail, y te llega en enero de 2027.
 
-First, run the development server:
+Es un Next.js (pages router) que no tiene backend propio: el envío va contra
+`server_en_palabras` (`POST /api/carta-futuro`). El cupo de cartas impresas y la
+validación que manda son del server; lo de acá es espejo, para no hacer viajar
+un form que ya sabemos que va a rebotar.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Correr
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    npm install
+    npm run dev
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+`NEXT_PUBLIC_API_URL` solo hace falta para apuntar a otro backend (un localhost,
+una preview); por defecto usa el de producción. `NEXT_PUBLIC_GOOGLE_PLACES_KEY`
+es la del autocompletado de direcciones.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Las URLs
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Hay tres entradas, y cada origen se llama igual en la URL, en el `utm_source` y
+en la columna `origen` de la base:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+| URL | Dónde vive | En la base queda |
+| --- | --- | --- |
+| `/c/web` | el link en la web, el perfil, la bio | `web` |
+| `/c/qr-diseno` | el QR dentro de una pieza diseñada | `qr-diseno` |
+| `/c/qr-simple` | el QR solo, sin pieza alrededor | `qr-simple` |
 
-## Learn More
+Los dos QR tienen además un atajo, `/c/qd` y `/c/qs`, para que la URL entre en
+un QR más chico. Se resuelven al mismo origen: usar el atajo no cambia lo que se
+guarda.
 
-To learn more about Next.js, take a look at the following resources:
+Cualquier otro `/c/algo` da 404, así nadie inventa orígenes que después ensucian
+el tracking. La raíz `/` también sirve la landing, con origen `directo`: es para
+los links viejos y para lo que no sabemos de dónde viene.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Para separar puntos de pegado del mismo cartel va `utm_content` en la
+querystring, que pisa el default: `/c/qr-diseno?utm_content=palermo`. Los cuatro
+utm_* se pueden pisar así.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Cómo está armado
 
-## Deploy on Vercel
+`Flujo.jsx` es el que manda: guarda en qué paso estás y funde entre pantallas.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    portada → nombre → email → (el sobre se centra y se abre) → carta
+            → (el sobre se cierra) → entrega → confirmación
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Los textos viven todos en `src/constants/campana.js`, no en los componentes.
+`RECIBIENDO_CARTAS` es el interruptor para cerrar la convocatoria (el server
+tiene el suyo: este decide qué se ve, el del server qué se acepta).
+
+Los renders del sobre comparten un lienzo de 1232x1700 para poder encadenar
+imagen y video sin saltos. Eso deja aire muerto arriba, que la clase `.sobre`
+de `globals.css` descuenta del layout.

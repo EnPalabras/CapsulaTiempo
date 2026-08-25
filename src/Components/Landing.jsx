@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import Form from '@/Components/Form'
+import Flujo from '@/Components/Flujo'
 import Cerrada from '@/Components/Cerrada'
 
 const TITULO = 'Carta a tu yo del futuro · En Palabras'
@@ -45,9 +45,7 @@ export default function Landing({ abierta, origen }) {
         <link rel="icon" href="/icon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
-      <main className="min-h-screen bg-white">
-        {abierta ? <Form origen={origen} /> : <Cerrada />}
-      </main>
+      <main>{abierta ? <Flujo origen={origen} /> : <Cerrada />}</main>
     </>
   )
 }

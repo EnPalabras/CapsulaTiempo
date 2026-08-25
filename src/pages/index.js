@@ -1,9 +1,10 @@
 import Landing from '@/Components/Landing'
-import { RECIBIENDO_CARTAS } from '@/constants/campana'
+import { CAMPANA, RECIBIENDO_CARTAS } from '@/constants/campana'
 
 // La raíz es donde vivía la cápsula de 2023. La dejamos sirviendo la landing
-// nueva para que los links viejos que anden dando vueltas no caigan en un 404,
-// con su propio origen para no mezclarla con el QR ni con los DMs.
+// nueva para que los links viejos que anden dando vueltas no caigan en un 404.
+// Tiene su propio origen, 'directo', que es el cajón de lo que no sabemos de
+// dónde viene: quien entra por un link nuestro cae siempre en un /c/algo.
 export default Landing
 
 export async function getServerSideProps({ res }) {
@@ -17,7 +18,7 @@ export async function getServerSideProps({ res }) {
         utm: {
           source: 'directo',
           medium: 'directo',
-          campaign: null,
+          campaign: CAMPANA,
           content: null,
         },
       },

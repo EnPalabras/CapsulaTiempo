@@ -1,10 +1,13 @@
 import Landing from '@/Components/Landing'
-import { ORIGENES, RECIBIENDO_CARTAS } from '@/constants/campana'
+import { ALIAS, ORIGENES, RECIBIENDO_CARTAS } from '@/constants/campana'
 
 export default Landing
 
 export async function getServerSideProps({ params, query, res }) {
-  const nombre = params.origen
+  // El atajo se resuelve acá y no con un redirect: después de escanear un QR,
+  // un salto de más es medio segundo de datos móviles. Desde acá para abajo el
+  // atajo no existe, solo el origen real.
+  const nombre = ALIAS[params.origen] ?? params.origen
 
   // Whitelist: si alguien inventa una URL, 404. No queremos orígenes fantasma
   // ensuciando el tracking.

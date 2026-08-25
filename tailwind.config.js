@@ -6,60 +6,42 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx}',
     './node_modules/flowbite/**/*.js',
     './node_modules/flowbite-react/**/*.js',
-    
   ],
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        // Los breakpoints de Tailwind saltan de 1280 a 1536: `wide` es el corte
+        // propio para monitores de 1440, donde el diseño necesita más aire.
+        wide: '1440px',
+      },
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-        },
+        // Los colores de la marca. `tinta` es texto, botones y logo;
+        // `crema` es el fondo de página.
+        crema: '#FBF7F3',
+        tinta: '#301E11',
+        // Único gris del diseño: el borde de los campos.
+        borde: '#B7B0AB',
+      },
+      fontFamily: {
+        // Solo para el titular. Ver el @font-face en globals.css: hay un único
+        // corte, medium italic.
+        ivy: ['IvyBodoni', 'Georgia', 'serif'],
       },
     },
     fontFamily: {
-      body: [
-        'Inter',
-        'ui-sans-serif',
-        'system-ui',
-        '-apple-system',
-        'system-ui',
-        'Segoe UI',
-        'Roboto',
-        'Helvetica Neue',
-        'Arial',
-        'Noto Sans',
-        'sans-serif',
-        'Apple Color Emoji',
-        'Segoe UI Emoji',
-        'Segoe UI Symbol',
-        'Noto Color Emoji',
-      ],
+      // Gotham para todo lo que no sea el titular. Ver el @font-face en
+      // globals.css: un solo corte, Book, cubriendo 300-500.
       sans: [
-        'Inter',
+        'Gotham',
         'ui-sans-serif',
         'system-ui',
         '-apple-system',
-        'system-ui',
         'Segoe UI',
         'Roboto',
         'Helvetica Neue',
         'Arial',
-        'Noto Sans',
         'sans-serif',
-        'Apple Color Emoji',
-        'Segoe UI Emoji',
-        'Segoe UI Symbol',
-        'Noto Color Emoji',
       ],
     },
   },

@@ -68,42 +68,6 @@ export function Input({
   )
 }
 
-export function RadioGrupo({ name, label, value, onChange, opciones, error }) {
-  return (
-    <fieldset>
-      <legend className={`${claseLabel} mb-3`}>{label}</legend>
-      <div className="space-y-3">
-        {opciones.map((o) => {
-          const elegida = value === o.valor
-          return (
-            <label
-              key={o.valor}
-              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
-                elegida
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-300 bg-white hover:bg-gray-50'
-              }`}
-            >
-              <input
-                type="radio"
-                name={name}
-                value={o.valor}
-                checked={elegida}
-                onChange={onChange}
-                className="mt-0.5 h-4 w-4 shrink-0 border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm font-light leading-relaxed text-gray-700">
-                {o.label}
-              </span>
-            </label>
-          )
-        })}
-      </div>
-      {error && <p className={`${claseError} mt-2`}>{error}</p>}
-    </fieldset>
-  )
-}
-
 export function Select({
   id,
   label,
