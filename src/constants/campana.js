@@ -102,6 +102,12 @@ export const PASO_LISTO = {
     '¡Todo listo! Vas a recibir tu carta en Enero de 2027. Te enviamos un ' +
     'e-mail con todos los detalles.',
   cierre: '¡Gracias por sumarte!',
+  // La invitación a la marca, en el bloque violeta del final.
+  marca: {
+    texto: 'Mientras esperás tu carta, conocé más de En Palabras.',
+    cta: 'Ir a En Palabras',
+    href: 'https://enpalabras.com.ar',
+  },
 }
 
 export const PASO_ENTREGA = {
@@ -120,6 +126,10 @@ export const OPCIONES_FORMATO = [
     label: 'Prefiero recibirla por mail, sin compartir mi dirección.',
   },
 ]
+
+// El cartel violeta que corona la opción en papel mientras queda cupo.
+export const DESTACADO_PAPEL =
+  `Sos de las ${CUPO_PAPEL} personas que pueden recibirla en papel`
 
 export const CUPO_COMPLETO =
   `Las ${CUPO_PAPEL} cartas impresas ya están reservadas, así que esta vez la ` +

@@ -28,6 +28,14 @@ export default function Flujo({ origen }) {
     []
   )
 
+  // Atajo de desarrollo: ?paso=entrega o ?paso=listo abre un paso sin pasar
+  // por el back. No existe en producción.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    const atajo = new URLSearchParams(window.location.search).get('paso')
+    if (atajo) setPaso(atajo)
+  }, [])
+
   useEffect(() => {
     if (paso !== 'carta') return
     let vivo = true

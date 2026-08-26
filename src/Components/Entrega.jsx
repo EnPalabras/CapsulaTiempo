@@ -5,6 +5,7 @@ import AutocompleteCalle from '@/Components/AutocompleteCalle'
 import {
   CONFIRMACION_ONLINE,
   CUPO_COMPLETO,
+  DESTACADO_PAPEL,
   MICROTEXTO_DIRECCION,
   DATOS,
   OPCIONES_FORMATO,
@@ -144,23 +145,47 @@ export default function Entrega({
         )}
 
         <div className="mt-6 w-full space-y-3">
-          {opciones.map((opcion) => (
-            <label
-              key={opcion.valor}
-              className="flex cursor-pointer items-start gap-3 rounded-xl border border-borde bg-white p-4 text-left"
-            >
-              <input
-                type="radio"
-                name="preferencia"
-                value={opcion.valor}
-                checked={preferencia === opcion.valor}
-                onChange={(e) => setPreferencia(e.target.value)}
+          {opciones.map((opcion) => {
+            const destacada = opcion.valor === 'PAPEL'
 
-                className="mt-0.5 h-5 w-5 shrink-0 border-borde text-black accent-black focus:ring-0"
-              />
-              <span className="text-[16px] font-light">{opcion.label}</span>
-            </label>
-          ))}
+            const eleccion = (
+              <label
+                className={`flex cursor-pointer items-start gap-3 rounded-xl bg-white p-4 text-left ${
+                  destacada ? '' : 'border border-borde'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="preferencia"
+                  value={opcion.valor}
+                  checked={preferencia === opcion.valor}
+                  onChange={(e) => setPreferencia(e.target.value)}
+
+                  className="mt-0.5 h-5 w-5 shrink-0 border-borde text-black accent-black focus:ring-0"
+                />
+                <span className="text-[16px] font-light">{opcion.label}</span>
+              </label>
+            )
+
+            if (!destacada) {
+              return <div key={opcion.valor}>{eleccion}</div>
+            }
+
+            // La opción en papel va dentro de un marco violeta con el cartel
+            // del cupo arriba. El marco crece hacia afuera (-mx-2) para que la
+            // fila blanca quede del mismo ancho que la otra opción.
+            return (
+              <div
+                key={opcion.valor}
+                className="-mx-2 rounded-[18px] bg-[#6F437C] p-2"
+              >
+                <p className="px-2 pb-2 pt-1 text-center text-[13px] font-medium uppercase leading-tight tracking-[0.08em] text-white">
+                  {DESTACADO_PAPEL}
+                </p>
+                {eleccion}
+              </div>
+            )
+          })}
         </div>
 
         <div className="mt-6 grid w-full gap-4 sm:grid-cols-2">
