@@ -9,6 +9,8 @@ import {
   MICROTEXTO_DIRECCION,
   DATOS,
   OPCIONES_FORMATO,
+  CONSENTIMIENTO,
+  CONSENTIMIENTO_LINK,
   PASO_ENTREGA,
   PROVINCIAS,
 } from '@/constants/campana'
@@ -302,14 +304,14 @@ export default function Entrega({
             className="mt-0.5 h-4 w-4 shrink-0 rounded border-borde text-black accent-black focus:ring-0"
           />
           <label htmlFor="consentimiento" className="text-[14px] font-light">
-            Acepto que usen mis datos para enviarme esta carta, según el{' '}
+            {CONSENTIMIENTO}
             <a
               href="/privacidad"
               target="_blank"
               rel="noreferrer"
               className="underline"
             >
-              aviso de privacidad
+              {CONSENTIMIENTO_LINK}
             </a>
             .
           </label>
