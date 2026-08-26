@@ -45,13 +45,13 @@ export default function Portada({ onEmpezar }) {
           alt=""
           width={741}
           height={811}
-          className="mt-6 min-h-0 max-h-[306px] w-auto max-w-[280px] flex-1 object-contain object-bottom md:mt-8 md:max-h-[416px] md:max-w-[380px]"
+          className="mt-6 min-h-0 max-h-[306px] w-auto max-w-[280px] flex-1 object-contain object-bottom md:mt-8 md:max-h-[416px] md:max-w-[480px]"
         />
 
         <button
           type="button"
           onClick={onEmpezar}
-          className="relative z-10 -mt-9 rounded-full bg-tinta px-14 py-4 font-sans text-[16px] font-medium text-white transition-opacity hover:opacity-90 md:-mt-11 md:text-[20px]"
+          className="relative z-10 -mt-9 rounded-full bg-tinta px-14 py-4 font-sans text-[16px] font-semibold text-white transition-opacity hover:opacity-90 md:-mt-11 md:px-28 md:text-[20px]"
         >
           {PORTADA.cta}
         </button>
