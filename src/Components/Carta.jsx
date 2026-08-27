@@ -19,7 +19,7 @@ export default function Carta({ texto, onCambiar, onEnviar }) {
           {PASO_CARTA.titulo}
         </h2>
 
-        <p className="mt-3 text-[14px] font-light md:text-[16px]">
+        <p className="mt-3 text-[16px] font-light md:text-[19px]">
           {PASO_CARTA.subtitulo}
         </p>
 
